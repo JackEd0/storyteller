@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storyteller</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container pt-3 pb-3">
+        <h1>Storyteller</h1>
+
+        <div class="description">
+            <p>
+                This is a simple storyteller. You can add persons and events and add events to persons.
+                You can check the state of a person and check the state of all persons.
+                <br>
+                A person can have multiple traits. A person can be married, king, etc.
+                <br>
+                An event can have multiple traits. An event can be marriage, coronation, etc.
+                <br>
+                When an event is added to a person, the person will get the event traits.
+                <br>
+                When an event is removed from a person, the person will lose the event traits.
+                <br>
+                When you check the state of a person, you will get the person traits.
+                <br>
+                When you check the state of all persons, you will get the person traits of all persons.
+            </p>
+        </div>
+
+        <div class="mt-3">
+            <div class="mb-3">
+                <h2>Person</h2>
+                <label for="person" class="form-label">Person's id/name</label>
+                <input type="text" class="form-control" id="person" aria-describedby="personHelp">
+                <div id="personHelp" class="form-text">Put the ID or name of the person.</div>
+
+                <div class="mt-3">
+                    <button type="button" id="buttonAddPerson" class="btn btn-primary">Add</button>
+                    <button type="button" id="buttonRemovePerson" class="btn btn-secondary">Remove</button>
+                    <button type="button" id="buttonCheckPersonState" class="btn btn-secondary">Check</button>
+                    <div class="card mt-3">
+                        <div class="card-body" id="personActionResult"></div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mb-3 mt-3">
+                <h2>Event</h2>
+                <label for="event" class="form-label">Select an event</label>
+                <select id="event" class="form-select" aria-label="Events" aria-describedby="eventHelp">
+                    <!-- <option selected>Open this select menu</option>
+                    <option value="1">One</option> -->
+                </select>
+                <div id="eventHelp" class="form-text">Put the ID or name of the event.</div>
+
+                <div class="mb-3">
+                    <label for="eventPerson" class="form-label">Person's id/name</label>
+                    <input type="text" class="form-control" id="eventPerson">
+                </div>
+
+                <div class="mt-3">
+                    <button type="button" id="buttonAddEventToPerson" class="btn btn-primary">Add</button>
+                    <button type="button" id="buttonRemoveEventFromPerson" class="btn btn-secondary">Remove</button>
+                    <div class="card mt-3">
+                        <div class="card-body" id="eventActionResult"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <h2>Actions</h2>
+                <button type="button" id="buttonCheckAllPersonsStates" class="btn btn-secondary">Check All states</button>
+                <div class="card mt-3">
+                    <div class="card-body" id="statesActionResult"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // imediate function
+        (function() {
+            // get the person input
+            const personInput = document.getElementById('person');
+            // get the person action result
+            const personActionResult = document.getElementById('personActionResult');
+            // get the event select
+            const eventSelect = document.getElementById('event');
+            // get the event person input
+            const eventPersonInput = document.getElementById('eventPerson');
+            // get the event action result
+            const eventActionResult = document.getElementById('eventActionResult');
+            // get the states action result
+            const statesActionResult = document.getElementById('statesActionResult');
+            // get the button add person
+            const buttonAddPerson = document.getElementById('buttonAddPerson');
+            // get the button remove person
+            const buttonRemovePerson = document.getElementById('buttonRemovePerson');
+            // get the button check person state
+            const buttonCheckPersonState = document.getElementById('buttonCheckPersonState');
+            // get the button add event to person
+            const buttonAddEventToPerson = document.getElementById('buttonAddEventToPerson');
+            // get the button remove event from person
+            const buttonRemoveEventFromPerson = document.getElementById('buttonRemoveEventFromPerson');
+            // get the button check all persons states
+            const buttonCheckAllPersonsStates = document.getElementById('buttonCheckAllPersonsStates');
+
+            // create type Event object with id and name
+            function Event(id, name, traits) {
+                this.id = id;
+                this.name = name;
+                this.traits = traits;
+            }
+
+            // create type Person object with id and name
+            function Person(id, name, traits) {
+                this.id = id;
+                this.name = name;
+                this.traits = traits;
+            }
+
+            const personList = [
+                new Person(1, 'John', ['married', 'king']),
+            ];
+            const eventList = [
+                new Event(1, 'Marriage', ['married']),
+                new Event(2, 'Coronation', ['king']),
+            ];
+
+            // populate eventSelect with eventList
+            eventList.forEach(event => {
+                // create option element
+                const option = document.createElement('option');
+                // set the option value
+                option.value = event.id;
+                // set the option text
+                option.innerText = event.name;
+                // append the option to the eventSelect
+                eventSelect.appendChild(option);
+            });
+
+            // add event listener to the person add button
+            buttonAddPerson.addEventListener('click', function() {
+                // get the person input value
+                const personInputValue = personInput.value.trim();
+                // check if the person input value is empty
+                if (personInputValue === '') {
+                    // set the person action result text
+                    personActionResult.innerText = 'Please enter a person id/name.';
+                    return;
+                }
+                // chekc if the person name already exists in the personList
+                const personExists = personList.some(person => person.name === personInputValue);
+                // check if the person exists
+                if (personExists) {
+                    // set the person action result text
+                    personActionResult.innerText = 'Person ' + personInputValue + ' already exists.';
+                    return;
+                }
+                // add the person to the personList with autoincrement id
+                personList.push(new Person(personList.length + 1, personInputValue, []));
+                // set the person action result text
+                personActionResult.innerText = 'Person ' + personInputValue + ' added.';
+            });
+            // add event listener to the person remove button
+            buttonRemovePerson.addEventListener('click', function() {
+                // get the person input value
+                const personInputValue = personInput.value.trim();
+                // check if the person input value is empty
+                if (personInputValue === '') {
+                    // set the person action result text
+                    personActionResult.innerText = 'Please enter a person id/name.';
+                    return;
+                }
+                // chekc if the person name already exists in the personList
+                const personExists = personList.some(person => person.name === personInputValue);
+                // check if the person exists
+                if (!personExists) {
+                    // set the person action result text
+                    personActionResult.innerText = 'Person ' + personInputValue + ' does not exist.';
+                    return;
+                }
+                // remove the person from the personList
+                personList.splice(personList.findIndex(person => person.name === personInputValue), 1);
+                // set the person action result text
+                personActionResult.innerText = 'Person ' + personInputValue + ' removed.';
+            });
+            // add event listener to the person check state button
+            buttonCheckPersonState.addEventListener('click', function() {
+                // get the person input value
+                const personInputValue = personInput.value.trim();
+                // check if the person input value is empty
+                if (personInputValue === '') {
+                    // set the person action result text
+                    personActionResult.innerText = 'Please enter a person id/name.';
+                    return;
+                }
+                // chekc if the person name already exists in the personList
+                const personExists = personList.some(person => person.name === personInputValue);
+                // check if the person exists
+                if (!personExists) {
+                    // set the person action result text
+                    personActionResult.innerText = 'Person ' + personInputValue + ' does not exist.';
+                    return;
+                }
+                // get the person from the personList
+                const person = personList.find(person => person.name === personInputValue);
+                // set the person action result text
+                personActionResult.innerText = 'Person ' + person.name + ' is ' + person.traits.join(', ') + '.';
+            });
+
+            // add event listener to the event add button
+            buttonAddEventToPerson.addEventListener('click', function() {
+                // get the event select value
+                const eventSelectValue = eventSelect.value;
+                // get the event person input value
+                const eventPersonInputValue = eventPersonInput.value.trim();
+                // check if the event person input value is empty
+                if (eventPersonInputValue === '') {
+                    // set the event action result text
+                    eventActionResult.innerText = 'Please enter a person id/name.';
+                    return;
+                }
+                // chekc if the person name already exists in the personList
+                const personExists = personList.some(person => person.name === eventPersonInputValue);
+                // check if the person exists
+                if (!personExists) {
+                    // set the event action result text
+                    eventActionResult.innerText = 'Person ' + eventPersonInputValue + ' does not exist.';
+                    return;
+                }
+                // get the person from the personList
+                const person = personList.find(person => person.name === eventPersonInputValue);
+                // get the event from the eventList
+                const event = eventList.find(event => event.id === parseInt(eventSelectValue));
+                // add event traits to the person traits only if the person does not have the event traits
+                event.traits.forEach(eventTrait => {
+                    if (!person.traits.includes(eventTrait)) {
+                        person.traits.push(eventTrait);
+                    }
+                });
+                // set the event action result text
+                eventActionResult.innerText = 'Event ' + event.name + ' added to person ' + person.name + '.';
+            });
+            // add event listener to the event remove button
+            buttonRemoveEventFromPerson.addEventListener('click', function() {
+                // get the event select value
+                const eventSelectValue = eventSelect.value;
+                // get the event person input value
+                const eventPersonInputValue = eventPersonInput.value.trim();
+                // check if the event person input value is empty
+                if (eventPersonInputValue === '') {
+                    // set the event action result text
+                    eventActionResult.innerText = 'Please enter a person id/name.';
+                    return;
+                }
+                // chekc if the person name already exists in the personList
+                const personExists = personList.some(person => person.name === eventPersonInputValue);
+                // check if the person exists
+                if (!personExists) {
+                    // set the event action result text
+                    eventActionResult.innerText = 'Person ' + eventPersonInputValue + ' does not exist.';
+                    return;
+                }
+                // get the person from the personList
+                const person = personList.find(person => person.name === eventPersonInputValue);
+                // get the event from the eventList
+                const event = eventList.find(event => event.id === parseInt(eventSelectValue));
+                // remove event traits from the person traits only if the person has the event traits
+                event.traits.forEach(eventTrait => {
+                    if (person.traits.includes(eventTrait)) {
+                        person.traits.splice(person.traits.findIndex(personTrait => personTrait === eventTrait), 1);
+                    }
+                });
+                // set the event action result text
+                eventActionResult.innerText = 'Event ' + event.name + ' removed from person ' + person.name + '.';
+            });
+
+            // add event listener to the check all persons states button
+            buttonCheckAllPersonsStates.addEventListener('click', function() {
+                // set the states action result text
+                statesActionResult.innerText = '';
+                // loop through the personList
+                personList.forEach(person => {
+                    // set the states action result text
+                    statesActionResult.innerText += 'Person ' + person.name + ' is ' + person.traits.join(', ') + '.\n';
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
