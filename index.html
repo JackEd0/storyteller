@@ -7,26 +7,36 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <div class="container pt-3 pb-3">
         <h1>Storyteller</h1>
 
-        <div class="description">
-            <p>
-                This is a simple storyteller. You can add persons and events and add events to persons.
-                You can check the state of a person and check the state of all persons.
-                <br>
-                A person can have multiple traits. A person can be married, king, etc.
-                <br>
-                An event can have multiple traits. An event can be marriage, coronation, etc.
-                <br>
-                When an event is added to a person, the person will get the event traits.
-                <br>
-                When an event is removed from a person, the person will lose the event traits.
-                <br>
-                When you check the state of a person, you will get the person traits.
-                <br>
-                When you check the state of all persons, you will get the person traits of all persons.
-            </p>
+        <div class="accordion mt-3" id="accordionExample">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                  Description
+                </button>
+              </h2>
+              <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                <div class="accordion-body">
+                    This is a simple storyteller. You can add persons and events and add events to persons.
+                    You can check the state of a person and check the state of all persons.
+                    <br>
+                    A person can have multiple traits. A person can be married, king, etc.
+                    <br>
+                    An event can have multiple traits. An event can be marriage, coronation, etc.
+                    <br>
+                    When an event is added to a person, the person will get the event traits.
+                    <br>
+                    When an event is removed from a person, the person will lose the event traits.
+                    <br>
+                    When you check the state of a person, you will get the person traits.
+                    <br>
+                    When you check the state of all persons, you will get the person traits of all persons.
+                </div>
+              </div>
+            </div>
         </div>
 
         <div class="mt-3">
