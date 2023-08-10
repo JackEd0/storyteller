@@ -115,10 +115,11 @@
             const buttonCheckAllPersonsStates = document.getElementById('buttonCheckAllPersonsStates');
 
             // create type Event object with id and name
-            function Event(id, name, traits) {
+            function Event(id, name, traitsToAdd, traitsToRemove) {
                 this.id = id;
                 this.name = name;
-                this.traits = traits;
+                this.traitsToAdd = traitsToAdd;
+                this.traitsToRemove = traitsToRemove;
             }
 
             // create type Person object with id and name
@@ -132,9 +133,27 @@
                 new Person(1, 'John', ['married', 'king']),
             ];
             const eventList = [
-                new Event(1, 'Marriage', ['married']),
-                new Event(2, 'Coronation', ['king']),
+                new Event(1, 'Wedding', ['married'], ['single']),
+                new Event(2, 'Divorce', ['single', 'brokenhearted'], ['married']),
+                new Event(3, 'Coronation', ['king'], ['noble']),
+                new Event(4, 'Deposition', ['noble'], ['king']),
+                new Event(5, 'Death', ['dead'], ['alive']),
+                new Event(6, 'Resurection', ['alive'], ['dead']),
+                new Event(7, 'Ennoblement', ['noble'], ['commoner']),
+                new Event(8, 'Degradation', ['commoner'], ['noble']),
+                new Event(9, 'KingWedding', ['king'], ['commoner']),
             ];
+            const traitEventRelationList = [
+                { traitInitial: 'single', eventOccuring: 'wedding', traitFinal: 'married' },
+                { traitInitial: 'married', eventOccuring: 'divorce', traitFinal: 'single' },
+                { traitInitial: 'noble', eventOccuring: 'coronation', traitFinal: 'king' },
+                { traitInitial: 'king', eventOccuring: 'deposition', traitFinal: 'noble' },
+                { traitInitial: 'alive', eventOccuring: 'death', traitFinal: 'dead' },
+                { traitInitial: 'dead', eventOccuring: 'resurection', traitFinal: 'alive' },
+                { traitInitial: 'commoner', eventOccuring: 'ennoblement', traitFinal: 'noble' },
+                { traitInitial: 'noble', eventOccuring: 'degradation', traitFinal: 'commoner' },
+            ];
+            const randomStartingTraits = ['commoner', 'noble', 'married', 'single', 'king', 'dead'];
 
             // populate eventSelect with eventList
             eventList.forEach(event => {
@@ -243,9 +262,15 @@
                 // get the event from the eventList
                 const event = eventList.find(event => event.id === parseInt(eventSelectValue));
                 // add event traits to the person traits only if the person does not have the event traits
-                event.traits.forEach(eventTrait => {
+                event.traitsToAdd.forEach(eventTrait => {
                     if (!person.traits.includes(eventTrait)) {
                         person.traits.push(eventTrait);
+                    }
+                });
+                // remove event traits from the person traits only if the person has the event traits
+                event.traitsToRemove.forEach(eventTrait => {
+                    if (person.traits.includes(eventTrait)) {
+                        person.traits.splice(person.traits.findIndex(personTrait => personTrait === eventTrait), 1);
                     }
                 });
                 // set the event action result text
@@ -275,8 +300,14 @@
                 const person = personList.find(person => person.name === eventPersonInputValue);
                 // get the event from the eventList
                 const event = eventList.find(event => event.id === parseInt(eventSelectValue));
+                // add event traits to the person traits only if the person does not have the event traits
+                event.traitsToRemove.forEach(eventTrait => {
+                    if (!person.traits.includes(eventTrait)) {
+                        person.traits.push(eventTrait);
+                    }
+                });
                 // remove event traits from the person traits only if the person has the event traits
-                event.traits.forEach(eventTrait => {
+                event.traitsToAdd.forEach(eventTrait => {
                     if (person.traits.includes(eventTrait)) {
                         person.traits.splice(person.traits.findIndex(personTrait => personTrait === eventTrait), 1);
                     }
