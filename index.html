@@ -78,9 +78,13 @@
 
             <div class="mb-3">
                 <h2>Actions</h2>
+                <button type="button" id="buttonGenerateStory" class="btn btn-primary">Generate Story</button>
                 <button type="button" id="buttonCheckAllPersonsStates" class="btn btn-secondary">Check All states</button>
                 <div class="card mt-3">
                     <div class="card-body" id="statesActionResult"></div>
+                </div>
+                <div class="card mt-3">
+                    <div class="card-body" id="storyActionResult"></div>
                 </div>
             </div>
         </div>
@@ -101,6 +105,8 @@
             const eventActionResult = document.getElementById('eventActionResult');
             // get the states action result
             const statesActionResult = document.getElementById('statesActionResult');
+            // get the states action result
+            const storyActionResult = document.getElementById('storyActionResult');
             // get the button add person
             const buttonAddPerson = document.getElementById('buttonAddPerson');
             // get the button remove person
@@ -126,7 +132,7 @@
             function Person(id, name, traits) {
                 this.id = id;
                 this.name = name;
-                this.traits = traits;
+                this.traits = traits || ['alive', 'commoner', 'single'];
             }
 
             const personList = [
@@ -141,19 +147,17 @@
                 new Event(6, 'Resurection', ['alive'], ['dead']),
                 new Event(7, 'Ennoblement', ['noble'], ['commoner']),
                 new Event(8, 'Degradation', ['commoner'], ['noble']),
-                new Event(9, 'KingWedding', ['king'], ['commoner']),
+                new Event(9, 'KingWedding', ['king', 'married'], ['commoner', 'single']),
             ];
-            const traitEventRelationList = [
-                { traitInitial: 'single', eventOccuring: 'wedding', traitFinal: 'married' },
-                { traitInitial: 'married', eventOccuring: 'divorce', traitFinal: 'single' },
-                { traitInitial: 'noble', eventOccuring: 'coronation', traitFinal: 'king' },
-                { traitInitial: 'king', eventOccuring: 'deposition', traitFinal: 'noble' },
-                { traitInitial: 'alive', eventOccuring: 'death', traitFinal: 'dead' },
-                { traitInitial: 'dead', eventOccuring: 'resurection', traitFinal: 'alive' },
-                { traitInitial: 'commoner', eventOccuring: 'ennoblement', traitFinal: 'noble' },
-                { traitInitial: 'noble', eventOccuring: 'degradation', traitFinal: 'commoner' },
-            ];
-            const randomStartingTraits = ['commoner', 'noble', 'married', 'single', 'king', 'dead'];
+            const traitEventRelationList = [];
+            // generate traitEventRelationList
+            eventList.forEach(event => {
+                event.traitsToAdd.forEach(eventTraitFinal => {
+                    event.traitsToRemove.forEach(eventTraitInitial => {
+                        traitEventRelationList.push({ traitInitial: eventTraitInitial, eventOccuring: event.name.toLowerCase(), traitFinal: eventTraitFinal });
+                    });
+                });
+            });
 
             // populate eventSelect with eventList
             eventList.forEach(event => {
@@ -166,6 +170,22 @@
                 // append the option to the eventSelect
                 eventSelect.appendChild(option);
             });
+
+            // create function to add an event to a person
+            function addEventToPerson(event, person) {
+                // add event traits to the person traits only if the person does not have the event traits
+                event.traitsToAdd.forEach(eventTrait => {
+                    if (!person.traits.includes(eventTrait) && event.traitsToRemove.some(eventTraitToRemove => person.traits.includes(eventTraitToRemove))) {
+                        person.traits.push(eventTrait);
+                    }
+                });
+                // remove event traits from the person traits only if the person has the event traits
+                event.traitsToRemove.forEach(eventTrait => {
+                    if (person.traits.includes(eventTrait)) {
+                        person.traits.splice(person.traits.findIndex(personTrait => personTrait === eventTrait), 1);
+                    }
+                });
+            }
 
             // add event listener to the person add button
             buttonAddPerson.addEventListener('click', function() {
@@ -261,18 +281,8 @@
                 const person = personList.find(person => person.name === eventPersonInputValue);
                 // get the event from the eventList
                 const event = eventList.find(event => event.id === parseInt(eventSelectValue));
-                // add event traits to the person traits only if the person does not have the event traits
-                event.traitsToAdd.forEach(eventTrait => {
-                    if (!person.traits.includes(eventTrait)) {
-                        person.traits.push(eventTrait);
-                    }
-                });
-                // remove event traits from the person traits only if the person has the event traits
-                event.traitsToRemove.forEach(eventTrait => {
-                    if (person.traits.includes(eventTrait)) {
-                        person.traits.splice(person.traits.findIndex(personTrait => personTrait === eventTrait), 1);
-                    }
-                });
+                // add event to the person
+                addEventToPerson(event, person);
                 // set the event action result text
                 eventActionResult.innerText = 'Event ' + event.name + ' added to person ' + person.name + '.';
             });
@@ -325,6 +335,52 @@
                     // set the states action result text
                     statesActionResult.innerText += 'Person ' + person.name + ' is ' + person.traits.join(', ') + '.\n';
                 });
+                // print traitEventRelationList to states action result text
+                statesActionResult.innerText += '\n';
+                traitEventRelationList.forEach(traitEventRelation => {
+                    statesActionResult.innerHTML += 'Trait <code>' + traitEventRelation.traitInitial + '</code> becomes <code>' + traitEventRelation.traitFinal + '</code> when <code>' + traitEventRelation.eventOccuring + '</code> occurs.<br>';
+                });
+            });
+
+            // add event listener to the generate story button
+            buttonGenerateStory.addEventListener('click', function() {
+                // set the story action result text
+                storyActionResult.innerText = '';
+
+                // generate random list of persons' names
+                const randomPersonNames = ['John', 'Mary', 'Peter', 'Paul', 'George', 'Ringo', 'Elvis', 'Michael', 'Freddie'];
+                // number of persons for this story (random between 1 and 3)
+                const numberOfPersons = Math.floor(Math.random() * 3) + 1;
+
+                // clear the personList and populate it with random persons
+                personList.length = 0;
+                for (let i = 0; i < numberOfPersons; i++) {
+                    // get a random person name
+                    const randomPersonName = randomPersonNames[Math.floor(Math.random() * randomPersonNames.length)];
+                    // add the person to the personList with autoincrement id and one random trait
+                    const randomPerson = new Person(personList.length + 1, randomPersonName, null);
+                    const randomEvent = eventList[Math.floor(Math.random() * eventList.length)];
+                    addEventToPerson(randomEvent, randomPerson);
+                    personList.push(randomPerson);
+                    // set the story action result text
+                    storyActionResult.innerText += 'Person ' + randomPersonName + ' added.\n';
+                    storyActionResult.innerText += 'Event ' + randomEvent.name + ' added to person ' + randomPerson.name + '.\n';
+                    storyActionResult.innerText += 'Person ' + randomPerson.name + ' is ' + randomPerson.traits.join(', ') + '.\n';
+                }
+
+                // add random number of events (between 1 and 3) to all persons
+                const numberOfEvents = Math.floor(Math.random() * 3) + 1;
+                for (let i = 0; i < numberOfEvents; i++) {
+                    // get a random event
+                    const randomEvent = eventList[Math.floor(Math.random() * eventList.length)];
+                    // get a random person
+                    const randomPerson = personList[Math.floor(Math.random() * personList.length)];
+                    // add the event to the person
+                    addEventToPerson(randomEvent, randomPerson);
+                    // set the story action result text
+                    storyActionResult.innerText += 'Event ' + randomEvent.name + ' added to person ' + randomPerson.name + '.\n';
+                    storyActionResult.innerText += 'Person ' + randomPerson.name + ' is ' + randomPerson.traits.join(', ') + '.\n';
+                }
             });
         })();
     </script>
